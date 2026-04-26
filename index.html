@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Improved网页</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body {
       margin: 0;
@@ -37,6 +38,39 @@
       flex: 1;
       padding: 20px;
     }
+
+    /* 右上角語言選擇 */
+    .topbar {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.92);
+      padding: 6px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      font-size: 14px;
+    }
+    .lang-select {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 14px;
+    }
+    .lang-code {
+      font-weight: 600;
+      color: #333;
+      padding-left: 6px;
+    }
+
+    @media (max-width: 640px) {
+      .topbar { top: 8px; right: 8px; font-size: 13px; }
+      .sidebar { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -46,10 +80,62 @@
     <a href="page3.html">联系我们</a>
     <a href="page4.html">支持我们</a>
   </div>
+
+  <!-- 右上角語言選擇 -->
+  <div class="topbar" role="region" aria-label="Language selector">
+    <label for="language" style="display:none">选择语言</label>
+    <select id="language" class="lang-select" aria-label="Select language">
+      <option value="zh-CN">中文（简体） — zh-CN</option>
+      <option value="zh-TW">中文（繁體） — zh-TW</option>
+      <option value="en">English — en</option>
+      <option value="ja-JP">日本語 — ja-JP</option>
+      <option value="ko-KR">한국어 — ko-KR</option>
+      <option value="es-ES">Español — es-ES</option>
+    </select>
+    <span id="langCode" class="lang-code" aria-hidden="true">zh-CN</span>
+  </div>
+
   <div class="content">
     <h1>欢迎来到Improved网页</h1>
-    <p>本网站为Improved网站，会在此更新模组文件
-      欢迎大家加群游玩模组</p>
-  </a>
+    <p>本网站为Improved网站，会在此更新模组文件。欢迎大家加群游玩模组。</p>
+  </div>
+
+  <script>
+    (function () {
+      const select = document.getElementById('language');
+      const codeSpan = document.getElementById('langCode');
+
+      // 取得儲存的語言，或使用瀏覽器語言作為預設
+      const saved = localStorage.getItem('site-lang');
+      const browser = (navigator.language || navigator.userLanguage || 'zh-CN').toLowerCase();
+
+      function normalize(lang) {
+        // 將常見的 en-US->en, zh->zh-CN 預設
+        if (!lang) return 'zh-CN';
+        if (lang.startsWith('zh-tw') || lang.startsWith('zh-hant')) return 'zh-TW';
+        if (lang.startsWith('zh')) return 'zh-CN';
+        if (lang.startsWith('en')) return 'en';
+        if (lang.startsWith('ja')) return 'ja-JP';
+        if (lang.startsWith('ko')) return 'ko-KR';
+        if (lang.startsWith('es')) return 'es-ES';
+        return lang;
+      }
+
+      const initial = saved || normalize(browser);
+      // 如果初始值在選項中，選取之；否則留第一個
+      const opt = Array.from(select.options).find(o => o.value.toLowerCase() === initial.toLowerCase());
+      if (opt) select.value = opt.value;
+      codeSpan.textContent = select.value;
+      document.documentElement.lang = select.value;
+
+      select.addEventListener('change', function () {
+        const v = select.value;
+        codeSpan.textContent = v;
+        document.documentElement.lang = v;
+        localStorage.setItem('site-lang', v);
+        // 這裡可以加入頁面語言切換或導向對應語言頁面的邏輯
+      });
+    })();
+  </script>
 </body>
 </html>
